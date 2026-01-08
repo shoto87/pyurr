@@ -18,7 +18,11 @@ class Cat:
             "name": "Purr",
             "hunger": 50.0,
             "happiness": 50.0,
+            "energy": 75.0,
             "last_update": time.time(),
+            "total_pets": 0,
+            "total_feeds": 0,
+            "total_plays": 0,
         }
         self.load()
         self.apply_decay()
@@ -38,13 +42,17 @@ class Cat:
         self.state["happiness"] = max(
             0.0, self.state["happiness"] - (elapsed_hours * 3)
         )
+        self.state["energy"] = max(0.0, self.state["energy"] - (elapsed_hours * 2))
 
     def get_mood_art(self):
         h = self.state["hunger"]
         hap = self.state["happiness"]
+        energy = self.state["energy"]
 
         if h > 80:
             return "[red]( =ＴωＴ= )[/red]\n[italic]Purr is starving...[/italic]"
+        if energy < 20:
+            return "[dim]( - ω - )zzz[/dim]\n[italic]Purr is exhausted...[/italic]"
         if hap < 20:
             return "[blue](  - ω - )[/blue]\n[italic]Purr feels lonely.[/italic]"
         if hap > 80:
@@ -79,6 +87,9 @@ def status():
     console.print(
         f"Happiness: [green]{'#' * int(pet.state['happiness'] // 10)}[/green] {pet.state['happiness']:.1f}%"
     )
+    console.print(
+        f"Energy:    [blue]{'#' * int(pet.state['energy'] // 10)}[/blue] {pet.state['energy']:.1f}%"
+    )
     console.print(f"\n[dim]{context_msg}[/dim]")
     pet.save()
 
@@ -91,8 +102,9 @@ def feed(item: str = typer.Argument("kibble", help="What to feed the cat")):
     else:
         pet.state["hunger"] = max(0, pet.state["hunger"] - 25)
         pet.state["happiness"] = min(100, pet.state["happiness"] + 5)
+        pet.state["total_feeds"] += 1
         console.print(
-            f"You fed Purr some [bold yellow]{item}[/bold yellow]! [magental]~nom nom~[/magenta]"
+            f"You fed Purr some [bold yellow]{item}[/bold yellow]! [magenta]~nom nom~[/magenta]"
         )
     pet.save()
 
@@ -100,9 +112,14 @@ def feed(item: str = typer.Argument("kibble", help="What to feed the cat")):
 @app.command()
 def play():
     """Play with your cat."""
-    pet.state["happiness"] = min(100, pet.state["happiness"] + 30)
-    pet.state["hunger"] = min(100, pet.state["hunger"] + 15)
-    console.print("You waved a string! Purr did a [bold]backflip[/bold].")
+    if pet.state["energy"] < 15:
+        console.print("Purr is too tired to play. Try letting them sleep!")
+    else:
+        pet.state["happiness"] = min(100, pet.state["happiness"] + 30)
+        pet.state["hunger"] = min(100, pet.state["hunger"] + 15)
+        pet.state["energy"] = max(0, pet.state["energy"] - 20)
+        pet.state["total_plays"] += 1
+        console.print("You waved a string! Purr did a [bold]backflip[/bold].")
     pet.save()
 
 
