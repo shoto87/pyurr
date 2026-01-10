@@ -92,7 +92,7 @@ def feed(item: str = typer.Argument("kibble", help="What to feed the cat")):
         pet.state["hunger"] = max(0, pet.state["hunger"] - 25)
         pet.state["happiness"] = min(100, pet.state["happiness"] + 5)
         console.print(
-            f"You fed Purr some [bold yellow]{item}[/bold yellow]! [magental]~nom nom~[/magenta]"
+            f"You fed Purr some [bold yellow]{item}[/bold yellow]! [magenta]~nom nom~[/magenta]"
         )
     pet.save()
 
